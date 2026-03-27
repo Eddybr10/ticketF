@@ -149,6 +149,7 @@ body {
 .grid { display: grid; }
 .grid-cols-2 { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
 .grid-cols-3 { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); gap: 1rem; }
 .flex { display: flex; } .flex-col { flex-direction: column; } .gap-2 { gap: 0.5rem;} .gap-4 { gap: 1rem; }
 .items-center { align-items: center; } .justify-between { justify-content: space-between; }
 .text-center { text-align: center; } .mb-2 { margin-bottom: 0.5rem; } .mb-4 { margin-bottom: 1rem; }
