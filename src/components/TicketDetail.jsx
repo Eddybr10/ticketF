@@ -15,6 +15,8 @@ export default function TicketDetail() {
   const [status, setStatus] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [approvalComment, setApprovalComment] = useState('');
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
 
   const formatId = (id) => 'TKT-' + String(id).padStart(5, '0');
 
@@ -57,6 +59,22 @@ export default function TicketDetail() {
       toast.error('Error al guardar.');
     }
     setUpdating(false);
+  };
+
+  const handleRequestApproval = async () => {
+    if (updating) return;
+    setUpdating(true);
+    const token = localStorage.getItem('adminToken');
+    try {
+      await axios.post(`${BACKEND_URL}/api/admin/tickets/${id}/request-approval`, { comment: approvalComment }, { headers: { Authorization: `Bearer ${token}` }});
+      toast.success('Ticket mandado a Aprobación');
+      setShowApprovalModal(false);
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al enviar a aprobación');
+      setUpdating(false);
+    }
   };
 
   const handleSendMessage = async (e) => {
@@ -157,18 +175,34 @@ export default function TicketDetail() {
             </div>
             
             {ticket.approvalState === 'None' || !ticket.approvalState ? (
-               <button 
-                 className="btn btn-secondary mb-4" 
-                 style={{ width: '100%', borderColor: 'var(--warning)', color: 'var(--warning)' }} 
-                 onClick={async () => {
-                    const token = localStorage.getItem('adminToken');
-                    await axios.post(`${BACKEND_URL}/api/admin/tickets/${id}/request-approval`, {}, { headers: { Authorization: `Bearer ${token}` }});
-                    toast.success('Ticket mandado a Aprobación');
-                    setTimeout(() => window.location.reload(), 1000);
-                 }}
-               >
-                 Mandar a Aprobación (Karen y Raúl)
-               </button>
+               showApprovalModal ? (
+                 <div className="mb-4 p-4" style={{ background: 'var(--bg-dark)', borderRadius: '8px', border: '1px solid var(--warning)' }}>
+                    <p className="font-bold mb-2" style={{ color: 'var(--warning)', fontSize: '0.9rem' }}>Mensaje para los Gerentes</p>
+                    <textarea 
+                      className="form-textarea"
+                      placeholder="Agrega un comentario sobre por qué solicitas aprobación..."
+                      value={approvalComment}
+                      onChange={(e) => setApprovalComment(e.target.value)}
+                      style={{ minHeight: '80px', marginBottom: '12px', fontSize: '0.85rem' }}
+                    ></textarea>
+                    <div className="flex gap-2">
+                       <button className="btn btn-secondary" style={{ flex: 1, borderColor: 'var(--warning)', color: 'var(--warning)' }} onClick={handleRequestApproval} disabled={updating}>
+                         Confirmar Envío
+                       </button>
+                       <button className="btn btn-secondary" style={{ padding: '8px 12px' }} onClick={() => setShowApprovalModal(false)} disabled={updating}>
+                         Cancelar
+                       </button>
+                    </div>
+                 </div>
+               ) : (
+                 <button 
+                   className="btn btn-secondary mb-4" 
+                   style={{ width: '100%', borderColor: 'var(--warning)', color: 'var(--warning)' }} 
+                   onClick={() => setShowApprovalModal(true)}
+                 >
+                   Mandar a Aprobación (Karen y Raúl)
+                 </button>
+               )
             ) : (
                <div className="mb-4 p-3" style={{ border: '1px solid var(--glass-border)', borderRadius: '8px', fontSize: '0.85rem' }}>
                   <p className="font-bold mb-2">Estado de Aprobación:</p>
